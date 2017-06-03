@@ -104,7 +104,15 @@ void setup() {
   read_sensor();
 
   // Handle http requests
-  server.on("/", handle_root);
+  server.on("/",  [](){
+    
+    read_sensor();
+    char response[50];
+    snprintf(response, 50, "Humidity: %s %", str_humidity);
+    server.send ( 200, "text/plain", response);  
+    digitalWrite(relayPin, relayState);
+  });
+  
 /*
   server.on("/temp", [](){
     read_sensor();
@@ -128,12 +136,7 @@ void setup() {
 
 
 void loop() {
-    
-    read_sensor();
-    char response[50];
-    snprintf(response, 50, "Humidity: %s %", str_humidity);
-    server.send ( 200, "text/plain", response);  
-    digitalWrite(relayPin, relayState);
+    server.handleClient();
     
   }
 
