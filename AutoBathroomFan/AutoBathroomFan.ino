@@ -105,12 +105,9 @@ void setup() {
 
   // Handle http requests
   server.on("/",  [](){
-    
-    read_sensor();
-    char response[50];
-    snprintf(response, 50, "Humidity: %s %", str_humidity);
-    server.send ( 200, "text/plain", response);  
-    digitalWrite(relayPin, relayState);
+   read_sensor();
+   server.send ( 200, "text/plain", str_humidity);
+   digitalWrite(relayPin, relayState);
   });
   
 /*
