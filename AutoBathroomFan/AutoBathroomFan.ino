@@ -6,8 +6,8 @@
 #define DHTTYPE DHT11   // DHT Shield uses DHT 11
 #define DHTPIN D4       // DHT Shield uses pin D4
 
-const int relayPin = D1; // Relay Shield use pin D1
-int relayState = LOW; // Start with the relay off
+const int relayPin = D1;           // Relay Shield use pin D1
+int relayState = LOW;              // Start with the relay off
 const long intervalRelay = 30000;  // pause for two seconds
 
 // Existing WiFi network
@@ -76,11 +76,9 @@ void read_sensor() {
 
 void setup() {
   Serial.begin(9600);
-  
   pinMode(relayPin, OUTPUT); // Set the relay output up
- 
+  
   dht.begin();
-
   Serial.println("WeMos DHT Server");
   Serial.println("");
 
@@ -103,11 +101,12 @@ void setup() {
   // Initial read
   read_sensor();
 
-  // Handle http requests
+  // Handle http requests display hum value
   server.on("/",  [](){
    read_sensor();
-   server.send ( 200, "text/plain", str_humidity);
-   digitalWrite(relayPin, relayState);
+   char response[50];
+   snprintf(response, 50, "Temperature: %s °C", str_temperature);
+   server.send(200, "text/plain", response);
   });
   
 /*
@@ -126,6 +125,7 @@ void setup() {
     server.send(200, "text/plain", response);
   });
 */
+
   // Start the web server
   server.begin();
   Serial.println("HTTP server started");
@@ -135,5 +135,5 @@ void setup() {
 void loop() {
     server.handleClient();
     
-  }
+}
 
