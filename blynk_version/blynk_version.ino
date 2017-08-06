@@ -35,7 +35,7 @@
 
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
-
+#include <SimpleTimer.h>
 #include <DHT.h>
 
 // You should get Auth Token in the Blynk App.
@@ -52,13 +52,17 @@ WidgetLED humLED(V1); //Set up of the HUM LED
 WidgetLED manLED(V2); //set up manual override led
 
 BlynkTimer timer;
-BlynkTimer overrideShutOffTimer;
 
 float h = 0;
 float t = 0;
 
 int fanState = 0;
 bool fanOverride = false;
+
+int CountdownRemain;
+int CountdownTimer;
+
+SimpleTimer overrideShutOffTimer;
 
 // This function sends Arduino's up time every second to Virtual Pin (5).
 // In the app, Widget's reading frequency should be set to PUSH. This means
@@ -78,27 +82,39 @@ void sendSensor()
   Blynk.virtualWrite(V6, t);
   fanControl();
 }
-
+// Fan Override Button
 BLYNK_WRITE(V0)
 {
   int buttonState = param.asInt();
-  Serial.print("button pressed ");
-  Serial.println(buttonState);
+Serial.print("button pressed: ");
+Serial.println(buttonState);
 
   if(buttonState == 1){
     fanState = 1;
     fanOverride = true;
     manLED.on();  
-    Serial.print(buttonState);
-    Serial.print(fanState);
-    Serial.println(fanOverride);
+    CountdownRemain = 600;
+    overrideShutOffTimer.enable(CountdownTimer);
+//Debug Calls
+Serial.print("button State: ");
+Serial.print(buttonState);
+Serial.print(" fan State: ");
+Serial.print(fanState);
+Serial.print(" fan override: ");
+Serial.println(fanOverride);
   }else{
     fanState = 0;
     fanOverride = true;
+    CountdownRemain = 600;
+    overrideShutOffTimer.enable(CountdownTimer);
     manLED.on(); 
-    Serial.print(buttonState);
-    Serial.print(fanState);
-    Serial.println(fanOverride);
+ //Debug Calls
+Serial.print("button State: ");
+Serial.print(buttonState);
+Serial.print(" fan State: ");
+Serial.print(fanState);
+Serial.print(" fan override: ");
+Serial.println(fanOverride);
   }
     fanControl();
 }
@@ -109,27 +125,46 @@ void fanControl()
       fanState = 1; //ON
       Blynk.virtualWrite(V0, fanState);
       humLED.on();  
-      Serial.println("if");
+Serial.print("over 60H, ");
     }
-    else if(h < 59 && fanOverride != true){
+    else if(h < 50 && fanOverride != true){
       fanState = 0; //OFF
       Blynk.virtualWrite(V0, fanState);
       humLED.off();  
-      Serial.println("else if");   
+Serial.print("less than 50H, ");   
     }
     else{
-      Serial.println("else");
+Serial.print("fan override, ");
     }
     digitalWrite(D1, fanState);
-    Serial.print(fanState);
-    Serial.println(fanOverride);
+
+Serial.print(" fan State: ");
+Serial.print(fanState);
+Serial.print(" fan override: ");
+Serial.println(fanOverride);
 }
-void overrideShutOff(){
+/*void overrideShutOff(){
   fanOverride = false;
   manLED.off(); 
   Serial.print("override shut off");
-}
+}*/
 
+void CountdownTimerFunction() {
+Serial.print("countdown function called ");
+  CountdownRemain--; // remove 1 every second
+Serial.println(CountdownRemain);
+  Blynk.virtualWrite(V3, CountdownRemain);
+  if (!CountdownRemain) { // check if CountdownRemain == 0/FALSE/LOW
+    overrideShutOffTimer.disable(CountdownTimer); // if 0 stop timer
+    CountdownRemain = 600;
+    fanOverride = false;
+    manLED.off();
+Serial.println("counter if");
+  } else {
+    //manLED.off();
+Serial.println("counter else");
+  }
+}
 
 // Your WiFi credentials.
 // Set password to "" for open networks.
@@ -145,7 +180,8 @@ void setup()
    // Setup a function to be called every 5 seconds
   timer.setInterval(5000L, sendSensor);
   //Shut off the manual over ride
-  overrideShutOffTimer.setInterval(600000L, overrideShutOff); 
+  CountdownTimer = overrideShutOffTimer.setInterval(1000L, CountdownTimerFunction); 
+  overrideShutOffTimer.disable(CountdownTimer);
 }
 
 void loop()
