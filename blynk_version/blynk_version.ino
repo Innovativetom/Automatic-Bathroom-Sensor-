@@ -32,7 +32,6 @@
 /* Comment this out to disable prints and save space */
 #define BLYNK_PRINT Serial
 
-
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
 #include <SimpleTimer.h>
@@ -42,31 +41,46 @@
 // Go to the Project Settings (nut icon).
 char auth[] = "cb352722349b40af96cb9753e78fd37d";
 
+// Your WiFi credentials.
+// Set password to "" for open networks.
+char ssid[] = "THE WIFI";
+char pass[] = "demiandthomas";
+
 // Setting up the pin and DHT version
 #define DHTTYPE DHT11   // DHT Shield uses DHT 11
 #define DHTPIN D4       // DHT Shield uses pin D4
-
 DHT dht(DHTPIN, DHTTYPE);
 
-WidgetLED humLED(V1); //Set up of the HUM LED
-WidgetLED manLED(V2); //set up manual override led
+// Set Colors of LEDs
+/* Not currently used
+//Widget Colors
+#define BLYNK_Green     "#23C48E"
+#define BLYNK_Blue      "#04C0F8"
+#define BLYNK_Red       "#D3435C"
+*/
+//Set up of the Humiditly LED & override LED 
+//these are software LEDs in app
+WidgetLED humLED(V1); 
+WidgetLED overrideLED(V2);
 
+//this timer is used for the blynk app/server and to call data from the sensor
 BlynkTimer timer;
 
+//Sensor varables
 float h = 0;
 float t = 0;
 
+//Fan varables
 int fanState = 0;
 bool fanOverride = false;
 
+// countdown variables and timer
 int CountdownRemain;
 int CountdownTimer;
 
 SimpleTimer overrideShutOffTimer;
 
-// This function sends Arduino's up time every second to Virtual Pin (5).
-// In the app, Widget's reading frequency should be set to PUSH. This means
-// that you define how often to send data to Blynk App.
+// this funtion gets the data from the sensro and send it to the blynk server for you to see on the app
 void sendSensor()
 {
   h = dht.readHumidity();
@@ -78,8 +92,10 @@ void sendSensor()
   }
   // You can send any value at any time.
   // Please don't send more that 10 values per second.
-  Blynk.virtualWrite(V5, h);
-  Blynk.virtualWrite(V6, t);
+  int hAsInt = int(h); // converts to int removing unessisary decimal points
+  int tAsInt = int(t);
+  Blynk.virtualWrite(V5, hAsInt);
+  Blynk.virtualWrite(V6, tAsInt);
   fanControl();
 }
 // Fan Override Button
@@ -92,7 +108,7 @@ Serial.println(buttonState);
   if(buttonState == 1){
     fanState = 1;
     fanOverride = true;
-    manLED.on();  
+    overrideLED.on();  
     CountdownRemain = 600;
     overrideShutOffTimer.enable(CountdownTimer);
 //Debug Calls
@@ -107,7 +123,7 @@ Serial.println(fanOverride);
     fanOverride = true;
     CountdownRemain = 600;
     overrideShutOffTimer.enable(CountdownTimer);
-    manLED.on(); 
+    overrideLED.on(); 
  //Debug Calls
 Serial.print("button State: ");
 Serial.print(buttonState);
@@ -158,18 +174,13 @@ Serial.println(CountdownRemain);
     overrideShutOffTimer.disable(CountdownTimer); // if 0 stop timer
     CountdownRemain = 600;
     fanOverride = false;
-    manLED.off();
+    overrideLED.off();
 Serial.println("counter if");
   } else {
     //manLED.off();
 Serial.println("counter else");
   }
 }
-
-// Your WiFi credentials.
-// Set password to "" for open networks.
-char ssid[] = "THE WIFI";
-char pass[] = "demiandthomas";
 
 void setup()
 {
