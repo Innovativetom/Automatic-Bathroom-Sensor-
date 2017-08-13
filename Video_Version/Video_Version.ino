@@ -1,22 +1,4 @@
 /*************************************************************
-  Download latest Blynk library here:
-    https://github.com/blynkkk/blynk-library/releases/latest
-
-  Blynk is a platform with iOS and Android apps to control
-  Arduino, Raspberry Pi and the likes over the Internet.
-  You can easily build graphic interfaces for all your
-  projects by simply dragging and dropping widgets.
-
-    Downloads, docs, tutorials: http://www.blynk.cc
-    Sketch generator:           http://examples.blynk.cc
-    Blynk community:            http://community.blynk.cc
-    Social networks:            http://www.fb.com/blynkapp
-                                http://twitter.com/blynk_app
-
-  Blynk library is licensed under MIT license
-  This example code is in public domain.
-
- *************************************************************
   This example runs directly on ESP8266 chip.
 
   Note: This requires ESP8266 support package:
@@ -39,15 +21,16 @@
 #include <SimpleTimer.h>
 #include <DHT.h>
 
+
 /////////////2/////////////
 // You should get Auth Token in the Blynk App.
 // Go to the Project Settings (nut icon).
-char auth[] = "";
+char auth[] = ""; //This needs to be your own!
 
 // Your WiFi credentials.
 // Set password to "" for open networks.
-char ssid[] = "";
-char pass[] = "";
+char ssid[] = ""; // This is your wifi "Name"
+char pass[] = "";// this is your wifi password
 
 /////////////3/////////////
 // Setting up the pin and DHT version
@@ -72,7 +55,6 @@ BlynkTimer timer;
 //this timer is used to shut off the fan after a cer
 SimpleTimer overrideShutOffTimer;
 
-
 /////////////4/////////////
 //Sensor varables
 float h = 0;
@@ -85,7 +67,6 @@ bool fanOverride = false;
 // countdown variables and timer
 int CountdownRemain;
 int CountdownTimer;
-
 
 /////////////5/////////////
 // this funtion gets the data from the sensro and send it to the blynk server for you to see on the app
@@ -106,6 +87,7 @@ void sendSensor()
   Blynk.virtualWrite(V6, tAsInt);
   fanControl();
 }
+
 
 /////////////6/////////////
 // Fan Override Button
@@ -148,6 +130,7 @@ Serial.println(fanOverride);
   }
     fanControl();
 }
+
 /////////////7/////////////
 void fanControl()
 {
@@ -174,7 +157,10 @@ Serial.print(" fan override: ");
 Serial.println(fanOverride);
 */
 }
-void CountdownTimerFunction() {
+
+/////////////8/////////////
+void CountdownTimerFunction() 
+{
 Serial.print("countdown function called ");
   CountdownRemain--; // remove 1 every second
 Serial.println(CountdownRemain);
@@ -192,6 +178,9 @@ Serial.println("counter if");
 Serial.println("counter else");
   }
 }
+
+
+/////////////9/////////////
 void setup()
 {
   // Debug console
@@ -204,10 +193,14 @@ void setup()
   CountdownTimer = overrideShutOffTimer.setInterval(1000L, CountdownTimerFunction); 
   overrideShutOffTimer.disable(CountdownTimer);
 }
+
+
+/////////////10/////////////
 void loop()
 {
   Blynk.run();
   timer.run();
   overrideShutOffTimer.run();
 }
+
 
