@@ -9,7 +9,9 @@
 
   Change WiFi ssid, pass, and Blynk auth token to run :)
   Feel free to apply it to any other example. It's simple!
- *************************************************************/
+************************************************************
+***Vist: youtube.com/innovativetom for instuctional video***
+************************************************************/
 
 /////////////1/////////////
 
@@ -18,9 +20,8 @@
 
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
-#include <SimpleTimer.h>
+#include <SimpleTimer.h> 
 #include <DHT.h>
-
 
 /////////////2/////////////
 // You should get Auth Token in the Blynk App.
@@ -38,8 +39,7 @@ char pass[] = "";// this is your wifi password
 #define DHTPIN D4       // DHT Shield uses pin D4
 DHT dht(DHTPIN, DHTTYPE);
 
-// Set Colors of LEDs
-/* Not currently used
+/* Set Colors of LEDs Not currently used
 //Widget Colors
 #define BLYNK_Green     "#23C48E"
 #define BLYNK_Blue      "#04C0F8"
@@ -179,7 +179,6 @@ Serial.println("counter else");
   }
 }
 
-
 /////////////9/////////////
 void setup()
 {
@@ -193,7 +192,6 @@ void setup()
   CountdownTimer = overrideShutOffTimer.setInterval(1000L, CountdownTimerFunction); 
   overrideShutOffTimer.disable(CountdownTimer);
 }
-
 
 /////////////10/////////////
 void loop()
